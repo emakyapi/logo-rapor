@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Rapor Paneli</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f0f2f5;
+      color: #222;
+    }
+
+    header {
+      background: #1a3a5c;
+      color: #fff;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 { font-size: 1.4rem; font-weight: 600; }
+
+    #son-guncelleme {
+      font-size: 0.82rem;
+      opacity: 0.75;
+    }
+
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #dde3ea;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+    }
+
+    nav button {
+      padding: 14px 22px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #555;
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    nav button:hover  { color: #1a3a5c; }
+    nav button.aktif  { color: #1a3a5c; border-bottom-color: #1a3a5c; font-weight: 600; }
+
+    main { padding: 28px 32px; max-width: 1300px; margin: 0 auto; }
+
+    .panel { display: none; }
+    .panel.aktif { display: block; }
+
+    .panel-baslik {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .panel-baslik h2 { font-size: 1.1rem; font-weight: 600; color: #1a3a5c; }
+
+    .sayac {
+      background: #e8f0fe;
+      color: #1a3a5c;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .btn-excel {
+      background: #217346;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      font-family: inherit;
+    }
+
+    .btn-excel:hover { background: #185a36; }
+
+    .arama-kutu {
+      padding: 8px 14px;
+      border: 1px solid #ccd5de;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      width: 240px;
+      font-family: inherit;
+    }
+
+    .tablo-kap {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .tablo-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    thead tr { background: #1a3a5c; color: #fff; }
+    thead th {
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    tbody tr { border-bottom: 1px solid #eef0f3; }
+    tbody tr:hover { background: #f5f8ff; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 10px 14px; }
+
+    .yukleniyor {
+      text-align: center;
+      padding: 60px;
+      color: #888;
+      font-size: 0.95rem;
+    }
+
+    .hata {
+      background: #fff3f3;
+      border: 1px solid #f5c6c6;
+      border-radius: 8px;
+      padding: 24px;
+      color: #c0392b;
+      margin: 20px 0;
+    }
+
+    .sayfalama {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      border-top: 1px solid #eef0f3;
+    }
+
+    .sayfa-btn {
+      padding: 6px 12px;
+      border: 1px solid #dde3ea;
+      border-radius: 5px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.83rem;
+      font-family: inherit;
+    }
+
+    .sayfa-btn:hover { background: #f0f4ff; }
+    .sayfa-btn.aktif { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
+
+    @media (max-width: 640px) {
+      main { padding: 16px; }
+      header { padding: 16px; }
+      nav button { padding: 12px 14px; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 Logo Rapor Paneli</h1>
+    <div id="son-guncelleme">Yükleniyor…</div>
+  </div>
+</header>
+
+<nav id="nav-menu">
+  <button class="aktif" onclick="sekmeAc('musteriler', this)">Müşteriler</button>
+  <button onclick="sekmeAc('son_siparisler', this)">Son Siparişler</button>
+  <button onclick="sekmeAc('stok_ozeti', this)">Stok Özeti</button>
+</nav>
+
+<main>
+  <div id="musteriler"     class="panel aktif" data-dosya="musteriler"></div>
+  <div id="son_siparisler" class="panel"        data-dosya="son_siparisler"></div>
+  <div id="stok_ozeti"     class="panel"        data-dosya="stok_ozeti"></div>
+</main>
+
+<script>
+// -------------------------------------------------------
+// Ayarlar
+// -------------------------------------------------------
+const SAYFA_BOYUTU = 50;  // Bir sayfada kac satir gosterilsin
+
+// Sutun basliklari Turkce cevirisi (isteğe bağlı)
+const BASLIK_CEVIRI = {
+  id:              "ID",
+  musteri_kodu:    "Müşteri Kodu",
+  musteri_adi:     "Müşteri Adı",
+  adres:           "Adres",
+  telefon:         "Telefon",
+  email:           "E-posta",
+  siparis_id:      "Sipariş ID",
+  siparis_no:      "Sipariş No",
+  tarih:           "Tarih",
+  toplam_tutar:    "Toplam Tutar",
+  indirimli_tutar: "Net Tutar",
+  stok_kodu:       "Stok Kodu",
+  stok_adi:        "Stok Adı",
+  birim:           "Birim",
+  mevcut_miktar:   "Mevcut",
+  siparis_miktari: "Siparişte",
+};
+
+// -------------------------------------------------------
+// Veri önbelleği
+// -------------------------------------------------------
+const onbellek = {};
+
+// -------------------------------------------------------
+// Meta bilgisini yükle
+// -------------------------------------------------------
+fetch('data/meta.json')
+  .then(r => r.json())
+  .then(meta => {
+    document.getElementById('son-guncelleme').textContent =
+      'Son güncelleme: ' + meta.tarih_turkce;
+  })
+  .catch(() => {
+    document.getElementById('son-guncelleme').textContent =
+      'Son güncelleme bilgisi alınamadı';
+  });
+
+// -------------------------------------------------------
+// Sekme degistirme
+// -------------------------------------------------------
+function sekmeAc(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('aktif'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('aktif'));
+  document.getElementById(id).classList.add('aktif');
+  btn.classList.add('aktif');
+  panelYukle(id);
+}
+
+// -------------------------------------------------------
+// Panel içeriğini yükle
+// -------------------------------------------------------
+function panelYukle(panelId) {
+  const panel = document.getElementById(panelId);
+  if (panel.dataset.yuklendi === 'evet') return;
+
+  const dosya = panel.dataset.dosya;
+  panel.innerHTML = '<div class="yukleniyor">Veriler yükleniyor…</div>';
+
+  fetch('data/' + dosya + '.json')
+    .then(r => {
+      if (!r.ok) throw new Error('Dosya bulunamadı: ' + dosya + '.json');
+      return r.json();
+    })
+    .then(data => {
+      onbellek[panelId] = data;
+      panelCiz(panelId, data, 1, '');
+      panel.dataset.yuklendi = 'evet';
+    })
+    .catch(err => {
+      panel.innerHTML = `
+        <div class="hata">
+          <strong>Veri yüklenemedi:</strong> ${err.message}<br>
+          <small>Rapor henüz üretilmemiş olabilir. GitHub Actions'ı kontrol edin.</small>
+        </div>`;
+    });
+}
+
+// -------------------------------------------------------
+// Tablo + sayfalama çiz
+// -------------------------------------------------------
+function panelCiz(panelId, data, sayfa, aramaMetni) {
+  const panel = document.getElementById(panelId);
+  const dosya = panel.dataset.dosya;
+
+  // Arama filtrele
+  const filtreli = aramaMetni.length >= 2
+    ? data.filter(satir =>
+        Object.values(satir).some(v =>
+          String(v ?? '').toLowerCase().includes(aramaMetni.toLowerCase())
+        )
+      )
+    : data;
+
+  const toplamSayfa = Math.max(1, Math.ceil(filtreli.length / SAYFA_BOYUTU));
+  sayfa = Math.min(sayfa, toplamSayfa);
+  const dilim = filtreli.slice((sayfa - 1) * SAYFA_BOYUTU, sayfa * SAYFA_BOYUTU);
+  const sutunlar = data.length ? Object.keys(data[0]) : [];
+
+  panel.innerHTML = `
+    <div class="panel-baslik">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h2>${panel.parentElement ? '' : ''}${dosya.replace(/_/g, ' ')}</h2>
+        <span class="sayac">${filtreli.length} kayıt</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <input class="arama-kutu" type="search" placeholder="Ara…"
+          value="${aramaMetni}"
+          oninput="panelCiz('${panelId}', onbellek['${panelId}'], 1, this.value)">
+        <a class="btn-excel" href="data/${dosya}.xlsx" download>⬇ Excel İndir</a>
+      </div>
+    </div>
+
+    <div class="tablo-kap">
+      <div class="tablo-scroll">
+        <table>
+          <thead>
+            <tr>${sutunlar.map(s => `<th>${BASLIK_CEVIRI[s] || s}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${dilim.length === 0
+              ? `<tr><td colspan="${sutunlar.length}" style="text-align:center;padding:40px;color:#888;">Kayıt bulunamadı</td></tr>`
+              : dilim.map(satir =>
+                  '<tr>' + sutunlar.map(s => {
+                    const v = satir[s] ?? '';
+                    return `<td>${v}</td>`;
+                  }).join('') + '</tr>'
+                ).join('')
+            }
+          </tbody>
+        </table>
+      </div>
+      ${toplamSayfa > 1 ? `
+        <div class="sayfalama">
+          ${Array.from({length: toplamSayfa}, (_, i) => i + 1)
+            .filter(p => p === 1 || p === toplamSayfa || Math.abs(p - sayfa) <= 2)
+            .reduce((acc, p, i, arr) => {
+              if (i > 0 && p - arr[i-1] > 1) acc.push('…');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map(p => p === '…'
+              ? `<span style="padding:6px 4px;color:#aaa">…</span>`
+              : `<button class="sayfa-btn ${p === sayfa ? 'aktif' : ''}"
+                   onclick="panelCiz('${panelId}', onbellek['${panelId}'], ${p}, '${aramaMetni}')">${p}</button>`
+            ).join('')}
+        </div>` : ''}
+    </div>`;
+}
+
+// İlk paneli yükle
+panelYukle('musteriler');
+</script>
+
+</body>
+</html>
