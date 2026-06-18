@@ -1,0 +1,48 @@
+name: Gunluk Logo Raporu
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  rapor-uret:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repoyu indir
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Kutuphaneleri yukle
+        run: pip install pyodbc pandas openpyxl python-dotenv
+
+      - name: ODBC suruculerini yukle
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 -q
+
+      - name: Raporu uret
+        env:
+          LOGO_SERVER: ${{ secrets.LOGO_SERVER }}
+          LOGO_DB:     ${{ secrets.LOGO_DB }}
+          LOGO_USER:   ${{ secrets.LOGO_USER }}
+          LOGO_PASS:   ${{ secrets.LOGO_PASS }}
+        run: python scripts/rapor_uret.py
+
+      - name: Degisiklikleri kaydet ve yukle
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/
+          git diff --cached --quiet && echo "Degisiklik yok, atlaniyor." || (
+            git commit -m "Otomatik rapor guncelleme: $(date +'%Y-%m-%d %H:%M')"
+            git push
+          )
